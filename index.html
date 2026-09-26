@@ -8,7 +8,7 @@
 
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="/logo-192.png">
-  <link rel="apple-touch-icon" href="/logo-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
@@ -120,7 +120,7 @@
   <iframe
     src="https://script.google.com/macros/s/AKfycbzLW6Kb7iIrichbBQF-6iVYvJxtaS8GUx3IZq6b6HgzjlBSWRQ1Q3wwEe2sj5d51L-_FQ/exec"
     title="Sulung Attendance"
-    allow="geolocation; camera; microphone; clipboard-write"
+    allow="geolocation; clipboard-write"
     referrerpolicy="no-referrer-when-downgrade">
   </iframe>
 
@@ -149,6 +149,13 @@
     const installText = document.getElementById("installText");
     const iosHelp = document.getElementById("iosHelp");
 
+    // "Lanjutkan di browser": jangan tampilkan panel lagi selama 7 hari
+    const SKIP_KEY = "sulungInstallSkipUntil";
+    const skipInstall = (() => {
+      try { return Date.now() < Number(localStorage.getItem(SKIP_KEY) || 0); } catch (e) { return false; }
+    })();
+
+
     const isStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       window.navigator.standalone === true;
@@ -161,7 +168,7 @@
     window.addEventListener("beforeinstallprompt", (event) => {
       event.preventDefault();
       deferredPrompt = event;
-      if (!isStandalone) panel.style.display = "flex";
+      if (!isStandalone && !skipInstall) panel.style.display = "flex";
     });
 
     installBtn.addEventListener("click", async () => {
@@ -187,6 +194,7 @@
 
     continueBtn.addEventListener("click", () => {
       panel.style.display = "none";
+      try { localStorage.setItem(SKIP_KEY, String(Date.now() + 7 * 24 * 60 * 60 * 1000)); } catch (e) {}
     });
 
     window.addEventListener("appinstalled", () => {
@@ -195,7 +203,7 @@
     });
 
     // iPhone: show installation guidance when opened in Safari.
-    if (!isStandalone && isIOS) {
+    if (!isStandalone && isIOS && !skipInstall) {
       panel.style.display = "flex";
       installText.textContent = "Pasang Sulung Attendance ke Layar Utama agar terbuka seperti aplikasi.";
     }
