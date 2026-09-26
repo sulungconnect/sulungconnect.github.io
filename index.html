@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Sulung Connect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+
+  <!-- Warna bar browser / status bar HP -->
+  <meta name="theme-color" content="#800000">
+
+  <!-- Supaya bisa "Tambahkan ke Layar Utama" dan terbuka layar penuh seperti aplikasi -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Sulung Connect">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <!-- Opsional: upload logo Sulung (PNG persegi 512x512) dengan nama logo.png
+       di folder yang sama, lalu hapus tanda komentar dua baris di bawah ini. -->
+  <!-- <link rel="icon" href="logo.png"> -->
+  <!-- <link rel="apple-touch-icon" href="logo.png"> -->
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #eef0f5;
+      overflow: hidden;
+    }
+    iframe {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!--
+    GANTI URL di bawah dengan URL Web App Anda (Deploy > Manage deployments,
+    salin URL yang berakhiran /exec).
+
+    allow="geolocation" WAJIB ada: tanpa ini GPS untuk absen tidak bisa
+    dipakai di dalam iframe.
+  -->
+  <iframe
+    src="https://script.google.com/macros/s/AKfycbzLW6Kb7iIrichbBQF-6iVYvJxtaS8GUx3IZq6b6HgzjlBSWRQ1Q3wwEe2sj5d51L-_FQ/exec"
+    title="Sulung Connect"
+    allow="geolocation; clipboard-write"
+    referrerpolicy="no-referrer-when-downgrade">
+  </iframe>
+</body>
+</html>
