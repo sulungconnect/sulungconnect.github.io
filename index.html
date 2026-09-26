@@ -2,31 +2,31 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Sulung Connect</title>
+  <title>Sulung Attendance</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-
-  <!-- Warna bar browser / status bar HP -->
   <meta name="theme-color" content="#800000">
 
-  <!-- Supaya bisa "Tambahkan ke Layar Utama" dan terbuka layar penuh seperti aplikasi -->
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="/logo-192.png">
+  <link rel="apple-touch-icon" href="/logo-192.png">
+
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="Sulung Connect">
+  <meta name="apple-mobile-web-app-title" content="Sulung Attendance">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-  <!-- Opsional: upload logo Sulung (PNG persegi 512x512) dengan nama logo.png
-       di folder yang sama, lalu hapus tanda komentar dua baris di bawah ini. -->
-  <!-- <link rel="icon" href="logo.png"> -->
-  <!-- <link rel="apple-touch-icon" href="logo.png"> -->
-
   <style>
+    * { box-sizing: border-box; }
     html, body {
       margin: 0;
       padding: 0;
+      width: 100%;
       height: 100%;
       background: #eef0f5;
       overflow: hidden;
+      font-family: Arial, sans-serif;
     }
+
     iframe {
       position: fixed;
       inset: 0;
@@ -34,22 +34,182 @@
       height: 100%;
       border: 0;
       display: block;
+      background: #eef0f5;
+    }
+
+    /* Install gate/banner */
+    #installPanel {
+      position: fixed;
+      z-index: 9999;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(128, 0, 0, 0.96);
+    }
+
+    #installCard {
+      width: min(420px, 100%);
+      padding: 28px 22px 24px;
+      border-radius: 24px;
+      background: #fff;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+    }
+
+    #installCard img {
+      width: 112px;
+      height: 112px;
+      border-radius: 24px;
+      object-fit: cover;
+      margin-bottom: 14px;
+    }
+
+    #installCard h1 {
+      margin: 0 0 8px;
+      font-size: 25px;
+      color: #222;
+    }
+
+    #installCard p {
+      margin: 0 0 20px;
+      line-height: 1.5;
+      color: #666;
+      font-size: 15px;
+    }
+
+    #installBtn {
+      width: 100%;
+      border: 0;
+      border-radius: 14px;
+      padding: 15px 18px;
+      background: #800000;
+      color: #fff;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #continueBtn {
+      width: 100%;
+      margin-top: 10px;
+      border: 0;
+      background: transparent;
+      color: #800000;
+      padding: 10px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    #iosHelp {
+      display: none;
+      text-align: left;
+      margin-top: 14px;
+      padding: 13px;
+      border-radius: 12px;
+      background: #f5f5f5;
+      color: #444;
+      font-size: 14px;
+      line-height: 1.5;
     }
   </style>
 </head>
-<body>
-  <!--
-    GANTI URL di bawah dengan URL Web App Anda (Deploy > Manage deployments,
-    salin URL yang berakhiran /exec).
 
-    allow="geolocation" WAJIB ada: tanpa ini GPS untuk absen tidak bisa
-    dipakai di dalam iframe.
-  -->
+<body>
   <iframe
     src="https://script.google.com/macros/s/AKfycbzLW6Kb7iIrichbBQF-6iVYvJxtaS8GUx3IZq6b6HgzjlBSWRQ1Q3wwEe2sj5d51L-_FQ/exec"
-    title="Sulung Connect"
-    allow="geolocation; clipboard-write"
+    title="Sulung Attendance"
+    allow="geolocation; camera; microphone; clipboard-write"
     referrerpolicy="no-referrer-when-downgrade">
   </iframe>
+
+  <div id="installPanel">
+    <div id="installCard">
+      <img src="/logo-512.png" alt="Logo Sulung">
+      <h1>Sulung Attendance</h1>
+      <p id="installText">Instal Sulung Attendance agar tampil seperti aplikasi di HP.</p>
+
+      <button id="installBtn">INSTALL APLIKASI</button>
+      <button id="continueBtn">Lanjutkan di browser</button>
+
+      <div id="iosHelp">
+        <b>iPhone / iPad:</b><br>
+        Ketuk tombol <b>Bagikan</b> di Safari → <b>Tambahkan ke Layar Utama</b> → <b>Tambah</b>.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let deferredPrompt = null;
+
+    const panel = document.getElementById("installPanel");
+    const installBtn = document.getElementById("installBtn");
+    const continueBtn = document.getElementById("continueBtn");
+    const installText = document.getElementById("installText");
+    const iosHelp = document.getElementById("iosHelp");
+
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+
+    const isIOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+    // Android/Chrome: wait for the browser's native install prompt.
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      deferredPrompt = event;
+      if (!isStandalone) panel.style.display = "flex";
+    });
+
+    installBtn.addEventListener("click", async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        panel.style.display = "none";
+        return;
+      }
+
+      if (isIOS) {
+        iosHelp.style.display = "block";
+        installText.textContent = "Ikuti langkah berikut untuk memasang aplikasi di iPhone.";
+        installBtn.style.display = "none";
+        return;
+      }
+
+      installText.textContent =
+        "Browser belum menyediakan tombol instalasi otomatis. Gunakan menu browser → Tambahkan ke layar utama.";
+      installBtn.textContent = "LIHAT PETUNJUK";
+    });
+
+    continueBtn.addEventListener("click", () => {
+      panel.style.display = "none";
+    });
+
+    window.addEventListener("appinstalled", () => {
+      panel.style.display = "none";
+      deferredPrompt = null;
+    });
+
+    // iPhone: show installation guidance when opened in Safari.
+    if (!isStandalone && isIOS) {
+      panel.style.display = "flex";
+      installText.textContent = "Pasang Sulung Attendance ke Layar Utama agar terbuka seperti aplikasi.";
+    }
+
+    // For other browsers, don't block the app until the install event is available.
+    // The native prompt can appear as soon as beforeinstallprompt fires.
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/sw.js").catch((err) => {
+          console.warn("Service worker gagal:", err);
+        });
+      });
+    }
+  </script>
 </body>
 </html>
