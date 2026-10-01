@@ -1,5 +1,5 @@
 /**
- * Service worker Sulung Attendance (GitHub Pages).
+ * Service worker Sulung Connect (GitHub Pages).
  * - Hanya menyimpan "kulit" aplikasi (index.html, manifest, logo) di GitHub Pages.
  * - Strategi NETWORK-FIRST: selalu ambil versi terbaru dari internet;
  *   cache hanya dipakai kalau HP sedang offline.
@@ -8,7 +8,7 @@
  * Kalau suatu saat mengganti file di GitHub dan ingin memaksa semua HP
  * membuang cache lama, cukup naikkan angka versi di CACHE_NAME (v2 -> v3).
  */
-const CACHE_NAME = "sulung-attendance-shell-v2";
+const CACHE_NAME = "sulung-connect-shell-v3";
 const APP_SHELL = [
   "/",
   "/index.html",

@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "Sulung Attendance",
-  "short_name": "Sulung Attendance",
+  "name": "Sulung Connect",
+  "short_name": "Sulung Connect",
   "description": "Sistem absensi karyawan Sulung Resto",
   "lang": "id",
   "start_url": "/",
