@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Sulung Connect - Layar TV (uji Tahap 1)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#000000">
+<link rel="icon" type="image/png" sizes="192x192" href="/logo-192.png">
+<style>
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden;
+               font-family: Arial, Helvetica, sans-serif; -webkit-text-size-adjust: 100%; }
+  body.sepi { cursor: none; }
+
+  /* Panggung: ukurannya & putarannya diatur skrip (lihat layout()). Semua ukuran memakai --u = 1% sisi terpendek panggung. */
+  #stage { position: fixed; left: 50%; top: 50%; overflow: hidden; background: #000; color: #fff; transform-origin: 50% 50%; }
+
+  .slide { position: absolute; left: 0; top: 0; right: 0; bottom: 0; opacity: 0; transition: opacity 1s ease;
+           display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .slide.aktif { opacity: 1; }
+
+  /* Slide 1: sambutan */
+  #s1 { background: linear-gradient(160deg, #8b1a1a 0%, #4a0b0c 100%); }
+  #s1 img { width: calc(var(--u) * 34); height: calc(var(--u) * 34); object-fit: contain; margin-bottom: calc(var(--u) * 5); -webkit-filter: brightness(0) invert(1); filter: brightness(0) invert(1); }   /* logo marun -> putih supaya terbaca di latar marun */
+  #s1 .judul { font-size: calc(var(--u) * 8.5); font-weight: 700; letter-spacing: calc(var(--u) * 0.4); }
+  #s1 .sub { font-size: calc(var(--u) * 3.6); margin-top: calc(var(--u) * 2.5); color: #f3d9a4; }
+
+  /* Slide 2: kalibrasi arah, tepi layar, dan kerapatan piksel */
+  #s2 { background-color: #101418;
+        background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.16) 0, rgba(255,255,255,.16) 1px, transparent 1px, transparent calc(var(--u) * 10)),
+                          repeating-linear-gradient(90deg, rgba(255,255,255,.16) 0, rgba(255,255,255,.16) 1px, transparent 1px, transparent calc(var(--u) * 10)); }
+  #s2 .tepi { position: absolute; left: calc(var(--u) * 1); top: calc(var(--u) * 1); right: calc(var(--u) * 1); bottom: calc(var(--u) * 1);
+              border: calc(var(--u) * 0.8) solid #ffd54a; }
+  #s2 .atas, #s2 .bawah { position: absolute; left: 0; right: 0; font-size: calc(var(--u) * 7); font-weight: 700; color: #ffd54a; }
+  #s2 .atas { top: calc(var(--u) * 3); }
+  #s2 .bawah { bottom: calc(var(--u) * 3); }
+  #s2 .pojok { position: absolute; font-size: calc(var(--u) * 2.4); font-weight: 700; color: #fff; background: #b3261e; padding: calc(var(--u) * 0.6) calc(var(--u) * 1.2); }
+  #s2 .p1 { left: calc(var(--u) * 2.2); top: calc(var(--u) * 14); } #s2 .p2 { right: calc(var(--u) * 2.2); top: calc(var(--u) * 14); }
+  #s2 .p3 { left: calc(var(--u) * 2.2); bottom: calc(var(--u) * 14); } #s2 .p4 { right: calc(var(--u) * 2.2); bottom: calc(var(--u) * 14); }
+  #s2 .ukuran { font-size: calc(var(--u) * 9); font-weight: 700; }
+  #s2 .petunjuk { font-size: calc(var(--u) * 3); color: #cfd8dc; margin-top: calc(var(--u) * 2); padding: 0 calc(var(--u) * 6); line-height: 1.35; }
+  #s2 .batang { display: flex; margin-top: calc(var(--u) * 5); width: 80%; height: calc(var(--u) * 5); }
+  #s2 .batang i { flex: 1; display: block; }
+
+  /* Slide 3: jam besar (bukti halaman hidup) */
+  #s3 { background: linear-gradient(200deg, #1b2a3a 0%, #0b1118 100%); }
+  #s3 .jam { font-size: calc(var(--u) * 15); font-weight: 700; letter-spacing: calc(var(--u) * 0.5); font-variant-numeric: tabular-nums; }
+  #s3 .tgl { font-size: calc(var(--u) * 4); margin-top: calc(var(--u) * 2); color: #b9c7d6; }
+  #s3 .ket { font-size: calc(var(--u) * 3); margin-top: calc(var(--u) * 6); color: #7f93a8; }
+
+  #nomor { position: absolute; right: calc(var(--u) * 2); bottom: calc(var(--u) * 1.6); font-size: calc(var(--u) * 2.2); color: rgba(255,255,255,.7);
+           background: rgba(0,0,0,.35); padding: calc(var(--u) * 0.3) calc(var(--u) * 1); z-index: 3; }
+  #bar { position: absolute; left: 0; bottom: 0; height: calc(var(--u) * 0.7); width: 0; background: #ffd54a; z-index: 3; }
+
+  /* Panel info (disembunyikan dengan tombol bawah di remote) */
+  #panel { position: absolute; left: calc(var(--u) * 2); top: calc(var(--u) * 2); right: calc(var(--u) * 2); z-index: 5;
+           background: rgba(0,0,0,.78); border: 1px solid rgba(255,255,255,.25); border-radius: calc(var(--u) * 1.4);
+           padding: calc(var(--u) * 1.6) calc(var(--u) * 2); font-size: calc(var(--u) * 2.15); line-height: 1.42; color: #fff; text-align: left; }
+  #panel.sembunyi { display: none; }
+  #panel h1 { margin: 0 0 calc(var(--u) * 1); font-size: calc(var(--u) * 2.9); color: #ffd54a; }
+  #panel .b { display: flex; padding: calc(var(--u) * 0.15) 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+  #panel .k { flex: 0 0 31%; color: #9fb3c8; }
+  #panel .v { flex: 1; word-break: break-word; }
+  #panel .ok { color: #7bdc8b; } #panel .bad { color: #ff8a80; } #panel .warn { color: #ffd54a; }
+  #panel .ua { font-size: calc(var(--u) * 1.6); color: #9fb3c8; }
+  #panel .log { margin-top: calc(var(--u) * 1); font-size: calc(var(--u) * 1.8); color: #cfd8dc; }
+  #panel .log div { padding: 1px 0; }
+  #panel .tombol { display: flex; flex-wrap: wrap; margin-top: calc(var(--u) * 1.2); }
+  #panel button { font-family: inherit; font-size: calc(var(--u) * 2.1); font-weight: 700; color: #fff; background: #7a1315; border: 0;
+                  border-radius: calc(var(--u) * 0.9); padding: calc(var(--u) * 1) calc(var(--u) * 1.6); margin: 0 calc(var(--u) * 1) calc(var(--u) * 1) 0; cursor: pointer; }
+  #panel .bantu { margin-top: calc(var(--u) * 0.6); font-size: calc(var(--u) * 1.8); color: #ffd54a; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="slide" id="s1">
+    <img id="logo" src="/logo-512.png" alt="" onerror="this.style.display='none'">
+    <div class="judul">SULUNG CONNECT</div>
+    <div class="sub">Layar TV &middot; halaman uji Tahap 1</div>
+  </div>
+  <div class="slide" id="s2">
+    <div class="tepi"></div>
+    <div class="atas">&#9650; ATAS</div>
+    <div class="pojok p1">KIRI-ATAS</div><div class="pojok p2">KANAN-ATAS</div>
+    <div class="pojok p3">KIRI-BAWAH</div><div class="pojok p4">KANAN-BAWAH</div>
+    <div class="ukuran" id="ukuranSlide">-</div>
+    <div class="petunjuk">Tekan &#9664; atau &#9654; di remote sampai tulisan ATAS berada di sisi paling atas TV.<br>Garis kuning harus terlihat utuh di keempat sisi (tidak terpotong).</div>
+    <div class="batang"><i style="background:#7a1315"></i><i style="background:#ffd54a"></i><i style="background:#ffffff"></i><i style="background:#808080"></i><i style="background:#1b2a3a"></i></div>
+    <div class="bawah">BAWAH &#9660;</div>
+  </div>
+  <div class="slide" id="s3">
+    <div class="jam" id="jamBesar">--:--:--</div>
+    <div class="tgl" id="tglBesar">-</div>
+    <div class="ket">Halaman hidup &middot; slide 3 dari 3</div>
+  </div>
+  <div id="nomor">1 / 3</div>
+  <div id="bar"></div>
+
+  <div id="panel">
+    <h1>Uji Layar TV &middot; Sulung Connect</h1>
+    <div id="isi"></div>
+    <div class="tombol">
+      <button type="button" data-aksi="kiri">&#8634; Putar kiri</button>
+      <button type="button" data-aksi="kanan">&#8635; Putar kanan</button>
+      <button type="button" data-aksi="normal">Normal (0&deg;)</button>
+      <button type="button" data-aksi="penuh">Layar penuh</button>
+      <button type="button" data-aksi="reload">Muat ulang</button>
+      <button type="button" data-aksi="tutup">Sembunyikan</button>
+    </div>
+    <div class="bantu">Remote: OK = layar penuh &middot; &#9664; putar kiri &middot; &#9654; putar kanan &middot; &#9650; normal &middot; &#9660; sembunyikan/tampilkan panel</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  /* ---------- Pengaturan & penyimpanan (semua aman bila penyimpanan browser diblokir) ---------- */
+  var K_ROT = 'tvRot', K_LOG = 'tvLog', K_MULAI = 'tvMulai', K_RELOAD = 'tvReload';
+  function baca(k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } }
+  function simpan(k, v) { try { window.localStorage.setItem(k, v); } catch (e) {} }
+  function qs(nama) { var m = location.search.match(new RegExp('[?&]' + nama + '=([^&]*)')); return m ? decodeURIComponent(m[1]) : ''; }
+  function p2(n) { return (n < 10 ? '0' : '') + n; }
+  function jamTeks(d) { return p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds()); }
+  function durasi(ms) { var s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60); return p2(h) + ':' + p2(m) + ':' + p2(s % 60); }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  var DETIK_SLIDE = parseInt(qs('detik'), 10) || 6;        // lama tiap slide
+  var DETIK_PING = parseInt(qs('ping'), 10) || 30;         // periksa jaringan
+  var DETIK_FPS = parseInt(qs('fps'), 10) || 60;           // ukur kelancaran
+  var mulaiHalaman = Date.now();
+  var stage = document.getElementById('stage');
+  var st = { sw: 0, sh: 0, slide: 0, wake: '-', pingMs: null, pingOk: 0, pingGagal: 0, pingBeruntun: 0, fps: null, fpsWaktu: 0 };
+
+  /* ---------- Catatan kejadian (bertahan walau halaman dimuat ulang; dibaca besok pagi) ---------- */
+  function bacaLog() { try { return JSON.parse(baca(K_LOG) || '[]'); } catch (e) { return []; } }
+  function catat(teks) {
+    var a = bacaLog(); a.push([Date.now(), teks]); if (a.length > 60) a = a.slice(a.length - 60);
+    simpan(K_LOG, JSON.stringify(a));
+    if (typeof gambar === 'function') gambar();
+  }
+
+  /* ---------- Putar & ukuran panggung ---------- */
+  var rot = 0;
+  (function () {
+    var p = qs('putar');
+    if (p) { rot = p === 'kanan' ? 90 : (p === 'kiri' ? 270 : 0); simpan(K_ROT, String(rot)); }
+    else { var s = parseInt(baca(K_ROT), 10); rot = (s === 90 || s === 270) ? s : 0; }
+  })();
+  function layout() {
+    var W = window.innerWidth || document.documentElement.clientWidth, H = window.innerHeight || document.documentElement.clientHeight;
+    var sw = rot === 0 ? W : H, sh = rot === 0 ? H : W;
+    stage.style.width = sw + 'px'; stage.style.height = sh + 'px';
+    stage.style.marginLeft = (-sw / 2) + 'px'; stage.style.marginTop = (-sh / 2) + 'px';
+    stage.style.webkitTransform = stage.style.transform = 'rotate(' + rot + 'deg)';
+    stage.style.setProperty('--u', (Math.min(sw, sh) / 100) + 'px');
+    st.sw = sw; st.sh = sh;
+    var u = document.getElementById('ukuranSlide'); if (u) u.textContent = sw + ' \u00D7 ' + sh;
+  }
+  function setRot(r) { rot = r; simpan(K_ROT, String(r)); layout(); catat('Putar: ' + (r === 0 ? 'normal' : (r === 90 ? 'kanan 90\u00B0' : 'kiri 90\u00B0'))); }
+  window.addEventListener('resize', layout);
+
+  /* ---------- Slideshow ---------- */
+  var slides = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3')];
+  var nomor = document.getElementById('nomor'), bar = document.getElementById('bar');
+  function tampilSlide(i) {
+    st.slide = i;
+    for (var k = 0; k < slides.length; k++) slides[k].className = 'slide' + (k === i ? ' aktif' : '');
+    nomor.textContent = (i + 1) + ' / ' + slides.length;
+    bar.style.transition = 'none'; bar.style.width = '0';
+    void bar.offsetWidth;
+    bar.style.transition = 'width ' + DETIK_SLIDE + 's linear'; bar.style.width = '100%';
+  }
+  function berikutnya() { tampilSlide((st.slide + 1) % slides.length); setTimeout(berikutnya, DETIK_SLIDE * 1000); }
+
+  /* ---------- Layar penuh & wake lock ---------- */
+  function layarPenuhAktif() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+  function masukLayarPenuh() {
+    var el = document.documentElement, f = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
+    if (!f) { catat('Layar penuh: browser tidak menyediakan'); return; }
+    try {
+      var r = f.call(el);
+      if (r && r.then) r.then(function () { catat('Layar penuh: berhasil'); }, function (e) { catat('Layar penuh: ditolak (' + ((e && e.name) || '?') + ')'); });
+    } catch (e) { catat('Layar penuh: galat ' + e.message); }
+  }
+  function keluarLayarPenuh() { var f = document.exitFullscreen || document.webkitExitFullscreen; if (f) { try { f.call(document); } catch (e) {} } }
+  function ganti() { if (layarPenuhAktif()) keluarLayarPenuh(); else masukLayarPenuh(); mintaWake(); }
+  function onFs() { catat('Layar penuh: ' + (layarPenuhAktif() ? 'aktif' : 'keluar')); }
+  document.addEventListener('fullscreenchange', onFs); document.addEventListener('webkitfullscreenchange', onFs);
+
+  var wl = null;
+  function mintaWake() {
+    if (!('wakeLock' in navigator)) { st.wake = 'tidak didukung browser'; return; }
+    navigator.wakeLock.request('screen').then(function (l) {
+      wl = l; st.wake = 'aktif'; catat('Wake Lock: aktif');
+      l.addEventListener('release', function () { st.wake = 'lepas'; catat('Wake Lock: lepas'); });
+    }, function (e) { st.wake = 'ditolak (' + ((e && e.name) || '?') + ')'; catat('Wake Lock: ' + st.wake); });
+  }
+
+  /* ---------- Jaringan ---------- */
+  function ping() {
+    var t0 = Date.now(), ac = ('AbortController' in window) ? new AbortController() : null;
+    var to = setTimeout(function () { if (ac) ac.abort(); }, 10000);
+    fetch('/manifest.json?ping=' + t0, { cache: 'no-store', signal: ac ? ac.signal : undefined }).then(function (r) {
+      clearTimeout(to); if (!r.ok) throw new Error('HTTP ' + r.status);
+      st.pingOk = Date.now(); st.pingMs = st.pingOk - t0;
+      if (st.pingBeruntun > 0) catat('Jaringan pulih (gagal ' + st.pingBeruntun + 'x berturut-turut)');
+      st.pingBeruntun = 0;
+    }).catch(function (e) {
+      clearTimeout(to); st.pingGagal++; st.pingBeruntun++;
+      if (st.pingBeruntun === 1) catat('Ping gagal: ' + ((e && e.name) || 'galat'));
+    });
+  }
+  window.addEventListener('offline', function () { catat('Browser: OFFLINE'); });
+  window.addEventListener('online', function () { catat('Browser: online lagi'); });
+  document.addEventListener('visibilitychange', function () {
+    catat('Halaman ' + (document.visibilityState === 'hidden' ? 'DISEMBUNYIKAN (tab/layar tidak aktif)' : 'tampil lagi'));
+    if (document.visibilityState === 'visible' && wl) mintaWake();
+  });
+  window.addEventListener('error', function (e) { catat('Galat skrip: ' + String(e.message || '?').slice(0, 80)); });
+
+  /* ---------- Kelancaran (FPS) ---------- */
+  function ukurFps() {
+    var n = 0, t0 = performance.now(), selesai = false;
+    function f(t) { n++; if (t - t0 >= 2000) { selesai = true; st.fps = Math.round(n * 1000 / (t - t0)); st.fpsWaktu = Date.now(); } else requestAnimationFrame(f); }
+    requestAnimationFrame(f);
+    setTimeout(function () { if (!selesai) { st.fps = 0; st.fpsWaktu = Date.now(); } }, 6000);
+  }
+
+  /* ---------- Muat ulang otomatis harian (default 03:00) ---------- */
+  var targetReload = (function () {
+    var det = parseInt(qs('reloadDetik'), 10);
+    if (det > 0) return Date.now() + det * 1000;
+    var t = (qs('reload') || '03:00').split(':'), now = new Date();
+    var d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), parseInt(t[0], 10) || 0, parseInt(t[1], 10) || 0, 0, 0);
+    if (d.getTime() <= now.getTime()) d = new Date(d.getTime() + 86400000);
+    return d.getTime();
+  })();
+  function cekReload() {
+    if (Date.now() >= targetReload) {
+      catat('Muat ulang otomatis');
+      simpan(K_RELOAD, String((parseInt(baca(K_RELOAD), 10) || 0) + 1));
+      try { window.sessionStorage.setItem('tvReloadAuto', '1'); } catch (e) {}
+      location.reload();
+    }
+  }
+
+  /* ---------- Panel info ---------- */
+  var panel = document.getElementById('panel'), isi = document.getElementById('isi');
+  var ua = navigator.userAgent || '', mChrome = ua.match(/Chrome\/([\d.]+)/), webos = /Web0S|webOS|SmartTV/i.test(ua);
+  function baris(k, v, kelas) { return '<div class="b"><div class="k">' + k + '</div><div class="v' + (kelas ? ' ' + kelas : '') + '">' + v + '</div></div>'; }
+  function gambar() {
+    if (panel.className.indexOf('sembunyi') !== -1) return;
+    var now = new Date(), mulai = parseInt(baca(K_MULAI), 10) || mulaiHalaman;
+    var W = window.innerWidth, H = window.innerHeight, dpr = window.devicePixelRatio || 1;
+    var ping = st.pingOk ? (st.pingBeruntun > 0 ? ['gagal ' + st.pingBeruntun + 'x berturut-turut', 'bad'] : [st.pingMs + ' ms &middot; ' + Math.max(0, Math.round((Date.now() - st.pingOk) / 1000)) + ' dtk lalu', 'ok'])
+                         : (st.pingGagal ? ['belum pernah berhasil (gagal ' + st.pingGagal + 'x)', 'bad'] : ['memeriksa...', '']);
+    var mem = (performance && performance.memory) ? Math.round(performance.memory.usedJSHeapSize / 1048576) + ' MB' : 'tidak tersedia';
+    var h = '';
+    h += baris('Waktu TV', jamTeks(now) + ' &middot; ' + p2(now.getDate()) + '/' + p2(now.getMonth() + 1) + '/' + now.getFullYear());
+    h += baris('Halaman berjalan', durasi(Date.now() - mulaiHalaman) + ' &nbsp;(sejak pertama dibuka: ' + durasi(Date.now() - mulai) + ')');
+    h += baris('Muat ulang otomatis', (parseInt(baca(K_RELOAD), 10) || 0) + ' kali &middot; berikutnya ' + jamTeks(new Date(targetReload)));
+    h += baris('Jendela browser', W + ' \u00D7 ' + H + ' &middot; layar ' + (screen.width || '?') + ' \u00D7 ' + (screen.height || '?') + ' &middot; piksel x' + dpr);
+    h += baris('Tampilan', 'putar ' + rot + '&deg; &middot; panggung ' + st.sw + ' \u00D7 ' + st.sh + ' &middot; slide ' + (st.slide + 1) + '/3 (' + DETIK_SLIDE + ' dtk)');
+    h += baris('Layar penuh', layarPenuhAktif() ? 'AKTIF' : 'tidak aktif', layarPenuhAktif() ? 'ok' : 'warn');
+    h += baris('Fitur browser', 'layar penuh: ' + ((document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) ? 'ada' : 'TIDAK ADA') + ' &middot; wake lock: ' + esc(st.wake));
+    h += baris('Browser', (mChrome ? 'Chromium ' + esc(mChrome[1]) : 'bukan Chromium') + (webos ? ' &middot; webOS terdeteksi' : ''));
+    h += baris('Jaringan', (navigator.onLine === false ? 'OFFLINE' : 'online') + ' &middot; ' + ping[0], navigator.onLine === false ? 'bad' : ping[1]);
+    h += baris('Kelancaran', st.fps === null ? 'mengukur...' : (st.fps + ' fps' + (st.fps && st.fps < 25 ? ' (berat)' : '') + ' &middot; diukur ' + jamTeks(new Date(st.fpsWaktu))) + ' &middot; memori JS ' + mem, st.fps !== null && st.fps < 25 ? 'warn' : '');
+    h += '<div class="ua">' + esc(ua) + '</div>';
+    var log = bacaLog().slice(-8).reverse(), l = '';
+    for (var i = 0; i < log.length; i++) l += '<div>' + jamTeks(new Date(log[i][0])) + ' &nbsp;' + esc(log[i][1]) + '</div>';
+    h += '<div class="log"><b>Catatan kejadian (terbaru di atas)</b>' + (l || '<div>(kosong)</div>') + '</div>';
+    isi.innerHTML = h;
+  }
+  function togglePanel() { panel.className = panel.className.indexOf('sembunyi') !== -1 ? '' : 'sembunyi'; gambar(); }
+
+  /* ---------- Jam di slide 3 ---------- */
+  var HARI = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'], BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  function jamBesar() {
+    var d = new Date();
+    document.getElementById('jamBesar').textContent = jamTeks(d);
+    document.getElementById('tglBesar').textContent = HARI[d.getDay()] + ', ' + d.getDate() + ' ' + BULAN[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  /* ---------- Masukan: remote & pointer ---------- */
+  document.addEventListener('keydown', function (e) {
+    var k = e.keyCode || e.which, ae = document.activeElement;
+    if (k === 13 && ae && ae.tagName === 'BUTTON') return;           // OK pada tombol yang sedang fokus = klik tombol itu
+    if (k === 37 || k === 49) setRot(270);
+    else if (k === 39 || k === 50) setRot(90);
+    else if (k === 38 || k === 48) setRot(0);
+    else if (k === 40 || k === 51) togglePanel();
+    else if (k === 13 || k === 32) ganti();
+    else return;
+    e.preventDefault();
+  });
+  document.addEventListener('click', function (e) {
+    var t = e.target, aksi = t && t.getAttribute ? t.getAttribute('data-aksi') : null;
+    if (aksi) {
+      if (t.blur) t.blur();
+      if (aksi === 'kiri') setRot(270); else if (aksi === 'kanan') setRot(90); else if (aksi === 'normal') setRot(0);
+      else if (aksi === 'penuh') ganti(); else if (aksi === 'tutup') togglePanel(); else if (aksi === 'reload') location.reload();
+      return;
+    }
+    if (panel.contains(t)) return;
+    ganti();
+  });
+  var sepiTimer = null;
+  function gerak() { document.body.className = ''; clearTimeout(sepiTimer); sepiTimer = setTimeout(function () { document.body.className = 'sepi'; }, 4000); }
+  document.addEventListener('mousemove', gerak); gerak();
+
+  /* ---------- Mulai ---------- */
+  if (!baca(K_MULAI)) simpan(K_MULAI, String(mulaiHalaman));
+  var otomatis = false;
+  try { otomatis = window.sessionStorage.getItem('tvReloadAuto') === '1'; window.sessionStorage.removeItem('tvReloadAuto'); } catch (e) {}
+  layout(); jamBesar(); tampilSlide(0); setTimeout(berikutnya, DETIK_SLIDE * 1000);
+  catat(otomatis ? 'Mulai setelah muat ulang otomatis' : 'Halaman dibuka');
+  ping(); setInterval(ping, DETIK_PING * 1000);
+  setTimeout(ukurFps, 3000); setInterval(ukurFps, DETIK_FPS * 1000);
+  setInterval(function () { jamBesar(); gambar(); cekReload(); }, 1000);
+  gambar();
+})();
+</script>
+</body>
+</html>
