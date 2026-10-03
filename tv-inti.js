@@ -51,12 +51,12 @@
   }
 
   /* ---------- Putar & ukuran panggung ---------- */
-  var rot = POTRET ? 90 : 0;
+  var rot = POTRET ? 270 : 0;
   (function () {
     if (!POTRET) return;                                  // VIP: landscape tetap
     var p = qs('putar');
     if (p) { rot = p === 'kiri' ? 270 : 90; simpan(K_ROT, String(rot)); }
-    else { var t = parseInt(baca(K_ROT), 10); rot = (t === 270) ? 270 : 90; }       // bawaan: putar kanan (90°)
+    else { var t = parseInt(baca(K_ROT), 10); rot = (t === 90) ? 90 : 270; }        // bawaan: putar KIRI (270°); pilihan yang tersimpan (90° atau 270°) dipertahankan
   })();
   function layout() {
     var W = window.innerWidth || document.documentElement.clientWidth, H = window.innerHeight || document.documentElement.clientHeight;
