@@ -8,20 +8,24 @@
  * Kalau suatu saat mengganti file di GitHub dan ingin memaksa semua HP
  * membuang cache lama, cukup naikkan angka versi di CACHE_NAME (v2 -> v3).
  */
-const CACHE_NAME = "sulung-connect-shell-v4";
+const CACHE_NAME = "sulung-connect-shell-v5";
 const APP_SHELL = [
   "/",
   "/index.html",
   "/manifest.json",
   "/logo-192.png",
   "/logo-512.png",
-  "/apple-touch-icon.png"
+  "/apple-touch-icon.png",
+  "/tv.html",
+  "/tv-vip.html",
+  "/tv-inti.js"
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(APP_SHELL))
+      // Satu per satu: berkas yang belum diunggah (404) tidak boleh menggagalkan pemasangan service worker
+      .then((cache) => Promise.all(APP_SHELL.map((u) => cache.add(u).catch(() => {}))))
       .then(() => self.skipWaiting())
   );
 });
@@ -47,6 +51,8 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
   // Pemeriksaan jaringan layar TV (/manifest.json?ping=...) jangan disimpan: URL-nya berbeda tiap kali dan cache akan membengkak.
   if (url.pathname === "/manifest.json" && url.search.indexOf("ping=") !== -1) return;
+  // Berkas video (mis. jaga.mp4, penjaga screensaver TV) diputar lewat permintaan Range; jangan dicegat / disimpan di sini.
+  if (/\.(mp4|webm)$/i.test(url.pathname)) return;
 
   event.respondWith(
     fetch(req, { cache: "no-store" })
