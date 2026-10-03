@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Sulung Connect - Uji penjaga screensaver (video + tampilan web)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<style>
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; color: #fff; overflow: hidden; font-family: Arial, Helvetica, sans-serif; }
+  /* video penjaga: berkas MP4 sungguhan. Letak/ukurannya diatur skrip menurut mode */
+  #jaga { position: fixed; background: #000; display: none; pointer-events: none; }
+  #stage { position: fixed; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; }
+  .slide { position: absolute; left: 0; top: 0; right: 0; bottom: 0; opacity: 0; transition: opacity 1s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .slide.aktif { opacity: 1; }
+  #s1 { background: linear-gradient(135deg, #7a1f1f, #5c1717); } #s2 { background: linear-gradient(135deg, #14181f, #2b3a55); } #s3 { background: linear-gradient(135deg, #f0b429, #b8860b); color: #14181f; }
+  .jam { font-size: 150px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .kecil { font-size: 40px; margin-top: 12px; opacity: .9; }
+  #status { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.78); padding: 10px 24px; font-size: 22px; line-height: 1.45; z-index: 5; }
+  #status b { color: #f0b429; } .ya { color: #7bdc8b; } .tidak { color: #ff8a80; }
+  #menu { position: fixed; left: 0; top: 0; right: 0; bottom: 0; z-index: 9; background: #14181f; padding: 28px 36px; box-sizing: border-box; }
+  #menu h1 { margin: 0 0 6px; font-size: 30px; color: #f0b429; } #menu .sub { color: #a7b0bf; font-size: 18px; margin-bottom: 18px; line-height: 1.4; }
+  #menu button { font-size: 22px; font-weight: 700; padding: 16px 26px; margin: 0 14px 12px 0; border: 3px solid transparent; border-radius: 14px; cursor: pointer; color: #fff; background: #7a1f1f; }
+  #menu button.terpilih { border-color: #f0b429; }
+</style>
+</head>
+<body>
+<video id="jaga" muted loop playsinline preload="auto">
+  <source src="jaga.mp4" type="video/mp4">
+  <source src="jaga.webm" type="video/webm">
+</video>
+
+<div id="stage">
+  <div class="slide aktif" id="s1"><div class="jam" id="j1">--:--:--</div><div class="kecil">Slide merah &middot; tampilan web biasa (HTML)</div></div>
+  <div class="slide" id="s2"><div class="jam" id="j2">--:--:--</div><div class="kecil">Slide biru &middot; tampilan web biasa (HTML)</div></div>
+  <div class="slide" id="s3"><div class="jam" id="j3">--:--:--</div><div class="kecil">Slide emas &middot; tampilan web biasa (HTML)</div></div>
+</div>
+<div id="status"></div>
+
+<div id="menu">
+  <h1>Uji penjaga screensaver: video kecil + tampilan web</h1>
+  <div class="sub">Tujuan: memastikan apakah <b>video MP4 kecil yang diputar di belakang atau di sudut</b> mencegah screensaver, <b>sambil tampilan web (slide HTML) tetap tampil normal</b>.<br>
+    Pilih mode, tekan <b>OK</b>, lalu <b>jangan sentuh remote minimal 5 menit</b> (screensaver diatur 3 menit). Foto layar saat selesai atau saat screensaver muncul.</div>
+  <button type="button" id="bSudut" data-m="sudut">1. Video mungil di sudut kanan-bawah (64&times;36, hitam)</button>
+  <button type="button" id="bLatar" data-m="latar">2. Video selebar layar di BELAKANG tampilan</button>
+  <div class="sub" id="dukung" style="margin-top:8px"></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var K = 'tvUjiPenjagaLog';
+  function baca() { try { return JSON.parse(window.localStorage.getItem(K) || '[]'); } catch (e) { return []; } }
+  function simpan(a) { try { window.localStorage.setItem(K, JSON.stringify(a)); } catch (e) {} }
+  function p2(n) { return (n < 10 ? '0' : '') + n; }
+  function jam(d) { return p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds()); }
+  function mmss(ms) { var s = Math.max(0, Math.floor(ms / 1000)); return p2(Math.floor(s / 60)) + ':' + p2(s % 60); }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  var v = document.getElementById('jaga'), menu = document.getElementById('menu'), status = document.getElementById('status');
+  var m = ((location.search.match(/[?&]v=([a-z]+)/) || [])[1]) || ''; if (m !== 'sudut' && m !== 'latar') m = '';
+  var pilih = m || 'sudut', jalan = false, mulai = 0, slide = 0;
+
+  function catat(t) { var a = baca(); a.push([Date.now(), t]); if (a.length > 100) a = a.slice(a.length - 100); simpan(a); }
+  function pasangMode() {
+    v.style.display = 'block';
+    if (pilih === 'sudut') { v.style.right = '0'; v.style.bottom = '0'; v.style.left = 'auto'; v.style.top = 'auto'; v.style.width = '64px'; v.style.height = '36px'; v.style.zIndex = '20'; }
+    else { v.style.left = '0'; v.style.top = '0'; v.style.right = 'auto'; v.style.bottom = 'auto'; v.style.width = '100%'; v.style.height = '100%'; v.style.zIndex = '0'; }
+  }
+  function layarPenuh() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+  function masukLayarPenuh() {
+    var el = document.documentElement, f = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!f) { catat('Layar penuh: tidak tersedia'); return; }
+    try { var r = f.call(el); if (r && r.then) r.then(function () { catat('Layar penuh: berhasil'); }, function (e) { catat('Layar penuh ditolak: ' + ((e && e.name) || '?')); }); } catch (e) { catat('Layar penuh galat: ' + e.message); }
+  }
+  function mulaiUji() {
+    if (jalan) return; jalan = true; mulai = Date.now(); menu.style.display = 'none'; pasangMode();
+    catat('MULAI uji: video ' + (pilih === 'sudut' ? 'mungil di sudut' : 'selebar layar di belakang'));
+    var p; try { p = v.play(); } catch (e) { catat('play() galat: ' + e.message); }
+    if (p && p.then) p.then(function () { catat('Video penjaga memutar'); }, function (e) { catat('Video penjaga DITOLAK memutar: ' + ((e && e.name) || '?')); });
+    masukLayarPenuh();
+    setInterval(function () { catat('Detak ' + mmss(Date.now() - mulai) + ' \u00B7 video ' + (v.paused ? 'BERHENTI' : 'memutar') + ' @' + (v.currentTime || 0).toFixed(1) + 's \u00B7 layar penuh ' + (layarPenuh() ? 'ya' : 'tidak')); }, 30000);
+  }
+  ['playing', 'pause', 'waiting', 'stalled', 'ended', 'error'].forEach(function (nm) { v.addEventListener(nm, function () { if (jalan) catat('Peristiwa video: ' + nm + ' @' + (v.currentTime || 0).toFixed(1) + 's' + (nm === 'error' && v.error ? ' kode ' + v.error.code : '')); }); });
+  function fsb() { catat('Layar penuh ' + (layarPenuh() ? 'AKTIF' : 'KELUAR')); }
+  document.addEventListener('fullscreenchange', fsb); document.addEventListener('webkitfullscreenchange', fsb);
+  document.addEventListener('visibilitychange', function () { catat('Halaman ' + (document.visibilityState === 'hidden' ? 'DISEMBUNYIKAN' : 'tampil lagi')); });
+  window.addEventListener('error', function (e) { catat('Galat skrip: ' + String(e.message || '?').slice(0, 80)); });
+
+  function gambar() {
+    var d = new Date(), t = jam(d);
+    document.getElementById('j1').textContent = t; document.getElementById('j2').textContent = t; document.getElementById('j3').textContent = t;
+    var a = baca().slice(-5).reverse(), l = '';
+    for (var i = 0; i < a.length; i++) l += '<div>' + jam(new Date(a[i][0])) + ' &nbsp;' + esc(a[i][1]) + '</div>';
+    status.innerHTML = '<b>Mode:</b> ' + (jalan ? (pilih === 'sudut' ? 'video mungil di sudut' : 'video selebar layar di belakang') : '-') +
+      ' &middot; <b>berjalan:</b> ' + (jalan ? mmss(Date.now() - mulai) : '00:00') +
+      ' &middot; <b>video:</b> ' + (!jalan ? '-' : (v.paused ? '<span class="tidak">BERHENTI</span>' : '<span class="ya">memutar @' + (v.currentTime || 0).toFixed(1) + 's</span>')) +
+      ' &middot; <b>layar penuh:</b> ' + (layarPenuh() ? 'ya' : 'tidak') + '<br><span style="font-size:18px;color:#cfd8dc">' + l + '</span>';
+    var probe = document.createElement('video'); var mp4 = probe.canPlayType('video/mp4; codecs="avc1.4D401F"');
+    document.getElementById('dukung').innerHTML = 'MP4 H.264: ' + (mp4 ? '<span class="ya">' + esc(mp4) + '</span>' : '<span class="tidak">TIDAK</span>') + ' &middot; Mode terpilih: <b>' + (pilih === 'sudut' ? '1. Sudut' : '2. Latar') + '</b>';
+    document.getElementById('bSudut').className = pilih === 'sudut' ? 'terpilih' : ''; document.getElementById('bLatar').className = pilih === 'latar' ? 'terpilih' : '';
+  }
+  function gantiSlide() { var s = document.querySelectorAll('.slide'); for (var i = 0; i < s.length; i++) s[i].className = 'slide' + (i === slide ? ' aktif' : ''); slide = (slide + 1) % s.length; }
+  setInterval(gantiSlide, 5000); gantiSlide(); setInterval(gambar, 1000); gambar();
+
+  document.addEventListener('keydown', function (e) {
+    var k = e.keyCode || e.which; if (jalan) return;
+    if (k === 37 || k === 38) { pilih = 'sudut'; gambar(); e.preventDefault(); } else if (k === 39 || k === 40) { pilih = 'latar'; gambar(); e.preventDefault(); } else if (k === 13) { mulaiUji(); e.preventDefault(); }
+  });
+  document.getElementById('bSudut').addEventListener('click', function () { pilih = 'sudut'; mulaiUji(); });
+  document.getElementById('bLatar').addEventListener('click', function () { pilih = 'latar'; mulaiUji(); });
+  catat('Halaman dibuka' + (m ? ' (mode ' + m + ' dipilih; tekan OK)' : ''));
+})();
+</script>
+</body>
+</html>
