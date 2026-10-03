@@ -8,7 +8,7 @@
  * Kalau suatu saat mengganti file di GitHub dan ingin memaksa semua HP
  * membuang cache lama, cukup naikkan angka versi di CACHE_NAME (v2 -> v3).
  */
-const CACHE_NAME = "sulung-connect-shell-v3";
+const CACHE_NAME = "sulung-connect-shell-v4";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -30,7 +30,9 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys()
       .then((keys) => Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+        // Hanya buang cache LAMA milik service worker ini (awalan "sulung-"). Cache lain, mis. gambar
+        // layar TV ("tv-gambar-..."), tidak boleh ikut terhapus.
+        keys.filter((key) => key.indexOf("sulung-") === 0 && key !== CACHE_NAME).map((key) => caches.delete(key))
       ))
       .then(() => self.clients.claim())
   );
@@ -43,6 +45,8 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(req.url);
   // Hanya file di GitHub Pages; request ke Google dibiarkan lewat apa adanya.
   if (url.origin !== self.location.origin) return;
+  // Pemeriksaan jaringan layar TV (/manifest.json?ping=...) jangan disimpan: URL-nya berbeda tiap kali dan cache akan membengkak.
+  if (url.pathname === "/manifest.json" && url.search.indexOf("ping=") !== -1) return;
 
   event.respondWith(
     fetch(req, { cache: "no-store" })

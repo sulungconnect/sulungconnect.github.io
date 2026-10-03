@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Sulung Connect - Layar TV</title>
+<title>Sulung Connect - Layar TV (kalibrasi)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#000000">
@@ -71,19 +71,66 @@
   #panel .bantu { margin-top: calc(var(--u) * 0.4); font-size: calc(var(--u) * 1.8); color: #64748b; font-weight: 500; }
   #panel .kbd { display: inline-block; min-width: calc(var(--u) * 2.4); text-align: center; padding: 0 calc(var(--u) * 0.9); margin: 0 calc(var(--u) * 0.2);
                 background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: calc(var(--u) * 0.7); font-weight: 800; color: #334155; }
+
+  .slide { position: absolute; left: 0; top: 0; right: 0; bottom: 0; opacity: 0; transition: opacity 1s ease;
+           display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .slide.aktif { opacity: 1; }
+
+  /* Slide 2: kalibrasi arah, tepi layar, dan kerapatan piksel (warna merek) */
+  #s2 { background-color: #14181f;
+        background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.09) 0, rgba(255,255,255,.09) 1px, transparent 1px, transparent calc(var(--u) * 10)),
+                          repeating-linear-gradient(90deg, rgba(255,255,255,.09) 0, rgba(255,255,255,.09) 1px, transparent 1px, transparent calc(var(--u) * 10)); }
+  #s2 .tepi { position: absolute; left: calc(var(--u) * 1); top: calc(var(--u) * 1); right: calc(var(--u) * 1); bottom: calc(var(--u) * 1);
+              border: calc(var(--u) * 0.8) solid #f0b429; border-radius: calc(var(--u) * 1.6); }
+  #s2 .atas, #s2 .bawah { position: absolute; left: 0; right: 0; font-size: calc(var(--u) * 7); font-weight: 800; color: #f0b429; letter-spacing: calc(var(--u) * -0.1); }
+  #s2 .atas { top: calc(var(--u) * 3.5); } #s2 .bawah { bottom: calc(var(--u) * 3.5); }
+  #s2 .pojok { position: absolute; font-size: calc(var(--u) * 2.3); font-weight: 800; color: #fff; padding: calc(var(--u) * 0.7) calc(var(--u) * 1.4);
+               background: linear-gradient(135deg, #7a1f1f, #5c1717); border-radius: calc(var(--u) * 1); }
+  #s2 .p1 { left: calc(var(--u) * 2.6); top: calc(var(--u) * 14.5); } #s2 .p2 { right: calc(var(--u) * 2.6); top: calc(var(--u) * 14.5); }
+  #s2 .p3 { left: calc(var(--u) * 2.6); bottom: calc(var(--u) * 14.5); } #s2 .p4 { right: calc(var(--u) * 2.6); bottom: calc(var(--u) * 14.5); }
+  #s2 .ukuran { font-size: calc(var(--u) * 9); font-weight: 800; color: #fff; letter-spacing: calc(var(--u) * -0.15); }
+  #s2 .petunjuk { font-size: calc(var(--u) * 3); font-weight: 500; color: #a7b0bf; margin-top: calc(var(--u) * 2); padding: 0 calc(var(--u) * 6); line-height: 1.4; }
+  #s2 .batang { display: flex; margin-top: calc(var(--u) * 5); width: 80%; height: calc(var(--u) * 5); border-radius: calc(var(--u) * 1); overflow: hidden; }
+  #s2 .batang i { flex: 1; display: block; }
+
+  /* Slide 3: jam besar (bukti halaman hidup), gaya kartu kepala aplikasi */
+  #s3 { background: linear-gradient(135deg, #7a1f1f 0%, #5c1717 100%); }
+  #s3 .jam { font-size: calc(var(--u) * 15); font-weight: 800; color: #fff; letter-spacing: calc(var(--u) * -0.2); font-variant-numeric: tabular-nums; }
+  #s3 .tgl { font-size: calc(var(--u) * 4); font-weight: 700; margin-top: calc(var(--u) * 2); color: #f0b429; }
+  #s3 .ket { display: inline-block; font-size: calc(var(--u) * 2.8); font-weight: 800; margin-top: calc(var(--u) * 6); padding: calc(var(--u) * 1) calc(var(--u) * 2.6);
+             border-radius: 999px; color: #5c1414; background: linear-gradient(150deg, #ffdd6b 0%, #f7c332 55%, #f0b31e 100%); }
+
+  #nomor { position: absolute; right: calc(var(--u) * 2); bottom: calc(var(--u) * 1.6); font-size: calc(var(--u) * 2.2); font-weight: 700; color: #fff;
+           background: rgba(20,24,31,.6); border-radius: 999px; padding: calc(var(--u) * 0.4) calc(var(--u) * 1.4); z-index: 3; }
+  #bar { position: absolute; left: 0; bottom: 0; height: calc(var(--u) * 0.7); width: 0; background: #f0b429; z-index: 3; }
 </style>
 </head>
 <body>
 <div id="stage">
-  <div class="lapis aktif splash" id="kosong">
+  <div class="slide splash" id="s1">
     <div class="lencana"><img id="logo" src="/logo-512.png" alt="" onerror="this.style.display='none'"></div>
     <div class="judul">Sulung Connect</div>
-    <div class="sub" id="kosongTeks">Menyiapkan layar TV...</div>
+    <div class="sub">Layar TV &middot; halaman kalibrasi</div>
   </div>
-  <div class="lapis" id="lapA"><img id="imgA" alt=""></div>
-  <div class="lapis" id="lapB"><img id="imgB" alt=""></div>
+  <div class="slide" id="s2">
+    <div class="tepi"></div>
+    <div class="atas">&#9650; ATAS</div>
+    <div class="pojok p1">KIRI-ATAS</div><div class="pojok p2">KANAN-ATAS</div>
+    <div class="pojok p3">KIRI-BAWAH</div><div class="pojok p4">KANAN-BAWAH</div>
+    <div class="ukuran" id="ukuranSlide">-</div>
+    <div class="petunjuk">Tekan &#9664; atau &#9654; di remote sampai tulisan ATAS berada di sisi paling atas TV.<br>Garis kuning harus terlihat utuh di keempat sisi (tidak terpotong).</div>
+    <div class="batang"><i style="background:#7a1315"></i><i style="background:#ffd54a"></i><i style="background:#ffffff"></i><i style="background:#808080"></i><i style="background:#1b2a3a"></i></div>
+    <div class="bawah">BAWAH &#9660;</div>
+  </div>
+  <div class="slide" id="s3">
+    <div class="jam" id="jamBesar">--:--:--</div>
+    <div class="tgl" id="tglBesar">-</div>
+    <div class="ket">Halaman hidup &middot; slide 3 dari 3</div>
+  </div>
+  <div id="nomor">1 / 3</div>
+  <div id="bar"></div>
 
-  <div id="panel" class="sembunyi">
+  <div id="panel">
     <div class="kepala">
       <div><div class="t1">Layar TV</div><div class="t2">Sulung Connect</div></div>
       <div class="pil" id="pilStatus">Memeriksa...</div>
@@ -106,12 +153,8 @@
 <script>
 (function () {
   'use strict';
-  /* ---------- Alamat layanan (Apps Script, tanpa login) ---------- */
-  var API = qs('api') || 'https://script.google.com/macros/s/AKfycbzLW6Kb7iIrichbBQF-6iVYvJxtaS8GUx3IZq6b6HgzjlBSWRQ1Q3wwEe2sj5d51L-_FQ/exec';
-  var NAMA_CACHE = 'tv-gambar-v1';
-
-  /* ---------- Penyimpanan aman (tetap jalan walau diblokir) ---------- */
-  var K_ROT = 'tvRot', K_LOG = 'tvLog', K_MULAI = 'tvMulai', K_RELOAD = 'tvReload', K_DAFTAR = 'tvDaftar';
+  /* ---------- Pengaturan & penyimpanan (semua aman bila penyimpanan browser diblokir) ---------- */
+  var K_ROT = 'tvRot', K_LOG = 'tvLog', K_MULAI = 'tvMulai', K_RELOAD = 'tvReload';
   function baca(k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } }
   function simpan(k, v) { try { window.localStorage.setItem(k, v); } catch (e) {} }
   function qs(nama) { var m = location.search.match(new RegExp('[?&]' + nama + '=([^&]*)')); return m ? decodeURIComponent(m[1]) : ''; }
@@ -120,15 +163,14 @@
   function durasi(ms) { var s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60); return p2(h) + ':' + p2(m) + ':' + p2(s % 60); }
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
-  var DETIK_AMBIL = parseInt(qs('ambil'), 10) || 60;       // seberapa sering memeriksa daftar tayang
-  var DETIK_PING = parseInt(qs('ping'), 10) || 30;
-  var DETIK_FPS = parseInt(qs('fps'), 10) || 120;
+  var DETIK_SLIDE = parseInt(qs('detik'), 10) || 6;        // lama tiap slide
+  var DETIK_PING = parseInt(qs('ping'), 10) || 30;         // periksa jaringan
+  var DETIK_FPS = parseInt(qs('fps'), 10) || 60;           // ukur kelancaran
   var mulaiHalaman = Date.now();
   var stage = document.getElementById('stage');
-  var st = { sw: 0, sh: 0, wake: '-', pingMs: null, pingOk: 0, pingGagal: 0, pingBeruntun: 0, fps: null, fpsWaktu: 0,
-             listOk: 0, listGagal: 0, listBeruntun: 0, listErr: '', versi: '-', sumber: '-', jumlahDaftar: 0, jumlahSiap: 0, diputar: '-' };
+  var st = { sw: 0, sh: 0, slide: 0, wake: '-', pingMs: null, pingOk: 0, pingGagal: 0, pingBeruntun: 0, fps: null, fpsWaktu: 0 };
 
-  /* ---------- Catatan kejadian (bertahan walau dimuat ulang) ---------- */
+  /* ---------- Catatan kejadian (bertahan walau halaman dimuat ulang; dibaca besok pagi) ---------- */
   function bacaLog() { try { return JSON.parse(baca(K_LOG) || '[]'); } catch (e) { return []; } }
   function catat(teks) {
     var a = bacaLog(); a.push([Date.now(), teks]); if (a.length > 60) a = a.slice(a.length - 60);
@@ -151,177 +193,23 @@
     stage.style.webkitTransform = stage.style.transform = 'rotate(' + rot + 'deg)';
     stage.style.setProperty('--u', (Math.min(sw, sh) / 100) + 'px');
     st.sw = sw; st.sh = sh;
+    var u = document.getElementById('ukuranSlide'); if (u) u.textContent = sw + ' \u00D7 ' + sh;
   }
   function setRot(r) { rot = r; simpan(K_ROT, String(r)); layout(); catat('Putar: ' + (r === 0 ? 'normal' : (r === 90 ? 'kanan 90\u00B0' : 'kiri 90\u00B0'))); }
   window.addEventListener('resize', layout);
 
-  /* ==========================================================
-     DAFTAR TAYANG: ambil dari layanan, simpan gambar di browser (Cache Storage)
-     ========================================================== */
-  var urlGambar = {};                  // id slide -> blob URL siap tampil
-  var daftarServer = [];               // [{id, detik}] sesuai server
-  var playlist = [];                   // slide yang gambarnya siap
-  var sedangSinkron = false, perluSinkronLagi = false, jid = 0;
-
-  function slideAman(x) {
-    if (!x || typeof x.id !== 'string' || !/^[A-Za-z0-9_-]{1,80}$/.test(x.id)) return null;
-    var d = Math.round(Number(x.detik)); if (isNaN(d)) d = 10;
-    return { id: x.id, detik: Math.max(3, Math.min(120, d)) };
+  /* ---------- Slideshow ---------- */
+  var slides = [document.getElementById('s1'), document.getElementById('s2'), document.getElementById('s3')];
+  var nomor = document.getElementById('nomor'), bar = document.getElementById('bar');
+  function tampilSlide(i) {
+    st.slide = i;
+    for (var k = 0; k < slides.length; k++) slides[k].className = 'slide' + (k === i ? ' aktif' : '');
+    nomor.textContent = (i + 1) + ' / ' + slides.length;
+    bar.style.transition = 'none'; bar.style.width = '0';
+    void bar.offsetWidth;
+    bar.style.transition = 'width ' + DETIK_SLIDE + 's linear'; bar.style.width = '100%';
   }
-  function bersihkanDaftar(arr) { var o = []; for (var i = 0; i < (arr || []).length && o.length < 20; i++) { var s = slideAman(arr[i]); if (s) o.push(s); } return o; }
-  function kunciCache(id) { return '/tv-gambar/' + encodeURIComponent(id); }
-
-  /* JSONP: cadangan kalau fetch lintas-situs diblokir browser TV */
-  function jsonp(url, batas) {
-    return new Promise(function (res, rej) {
-      var nm = 'tvCb' + (++jid) + '_' + Date.now(), s = document.createElement('script');
-      var t = setTimeout(function () { bersih(); rej(new Error('waktu habis')); }, batas);
-      function bersih() { clearTimeout(t); try { delete window[nm]; } catch (e) { window[nm] = undefined; } if (s.parentNode) s.parentNode.removeChild(s); }
-      window[nm] = function (d) { bersih(); res(d); };
-      s.onerror = function () { bersih(); rej(new Error('skrip gagal dimuat')); };
-      s.src = url + (url.indexOf('?') > -1 ? '&' : '?') + 'callback=' + nm;
-      document.head.appendChild(s);
-    });
-  }
-  function lewatFetch(url) {
-    var ac = ('AbortController' in window) ? new AbortController() : null;
-    var to = setTimeout(function () { if (ac) ac.abort(); }, 20000);
-    return fetch(url, { cache: 'no-store', signal: ac ? ac.signal : undefined }).then(function (r) {
-      clearTimeout(to); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json();
-    }, function (e) { clearTimeout(to); throw e; });
-  }
-  function ambilJson(params) {
-    var url = API + (API.indexOf('?') > -1 ? '&' : '?') + params;
-    return lewatFetch(url).then(function (d) { st.sumber = 'fetch'; return d; }, function () {
-      return jsonp(url, 30000).then(function (d) { st.sumber = 'jsonp'; return d; });
-    });
-  }
-
-  function base64KeBlob(b64, mime) {
-    var bin = atob(b64), a = new Uint8Array(bin.length);
-    for (var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i);
-    return new Blob([a], { type: mime || 'image/jpeg' });
-  }
-  function dariCache(id) {
-    if (!('caches' in window)) return Promise.resolve(null);
-    return caches.open(NAMA_CACHE).then(function (c) { return c.match(kunciCache(id)); })
-      .then(function (r) { return r ? r.blob() : null; })
-      .then(function (b) { return b ? URL.createObjectURL(b) : null; })
-      .catch(function () { return null; });
-  }
-  function keCache(id, blob) {
-    if (!('caches' in window)) return Promise.resolve();
-    return caches.open(NAMA_CACHE).then(function (c) { return c.put(kunciCache(id), new Response(blob, { headers: { 'Content-Type': blob.type || 'image/jpeg' } })); }).catch(function () {});
-  }
-  function unduhGambar(id) {
-    return ambilJson('tv=gambar&id=' + encodeURIComponent(id)).then(function (d) {
-      if (!d || !d.ok || !d.data) throw new Error('gambar tidak tersedia');
-      var blob = base64KeBlob(d.data, d.mime);
-      return keCache(id, blob).then(function () { urlGambar[id] = URL.createObjectURL(blob); return true; });
-    });
-  }
-  /* Gambar siap? Ada di memori -> ada di Cache Storage -> unduh (kalau boleh). */
-  function pastikanGambar(slide, bolehUnduh) {
-    if (urlGambar[slide.id]) return Promise.resolve(true);
-    return dariCache(slide.id).then(function (url) {
-      if (url) { urlGambar[slide.id] = url; return true; }
-      if (!bolehUnduh) return false;
-      return unduhGambar(slide.id).then(function () { return true; }, function (e) { catat('Gambar ' + slide.id + ' gagal diunduh: ' + String((e && e.message) || e).slice(0, 40)); return false; });
-    });
-  }
-  function bangunPlaylist() {
-    playlist = daftarServer.filter(function (s) { return !!urlGambar[s.id]; });
-    st.jumlahDaftar = daftarServer.length; st.jumlahSiap = playlist.length;
-    mulaiPutar();
-  }
-  function bersihkanGambarLama() {
-    var ada = {}; daftarServer.forEach(function (s) { ada[s.id] = 1; });
-    Object.keys(urlGambar).forEach(function (id) { if (!ada[id]) { try { URL.revokeObjectURL(urlGambar[id]); } catch (e) {} delete urlGambar[id]; } });
-    if ('caches' in window) {
-      caches.open(NAMA_CACHE).then(function (c) {
-        return c.keys().then(function (ks) { return Promise.all(ks.map(function (rq) {
-          var id = decodeURIComponent(String(rq.url).replace(/^.*\/tv-gambar\//, ''));
-          return ada[id] ? null : c.delete(rq);
-        })); });
-      }).catch(function () {});
-    }
-  }
-  /* Sinkron: pastikan semua gambar daftar baru ada, lalu tukar playlist */
-  function sinkron(slides) {
-    daftarServer = slides;
-    if (sedangSinkron) { perluSinkronLagi = true; return Promise.resolve(); }
-    sedangSinkron = true;
-    var rantai = Promise.resolve();
-    slides.forEach(function (s) { rantai = rantai.then(function () { return pastikanGambar(s, true).then(function () { bangunPlaylist(); }); }); });
-    return rantai.then(function () { bangunPlaylist(); bersihkanGambarLama(); }).then(function () {
-      sedangSinkron = false;
-      if (perluSinkronLagi) { perluSinkronLagi = false; return sinkron(daftarServer); }
-    }, function (e) { sedangSinkron = false; throw e; });
-  }
-  function ambilDaftar() {
-    return ambilJson('tv=daftar&t=' + Date.now()).then(function (d) {
-      if (!d || !d.ok || !Array.isArray(d.slides)) throw new Error('jawaban tidak valid');
-      var baru = bersihkanDaftar(d.slides);
-      if (st.listBeruntun > 0) catat('Daftar tayang pulih (gagal ' + st.listBeruntun + 'x berturut-turut)');
-      st.listOk = Date.now(); st.listBeruntun = 0; st.listErr = '';
-      var berubah = String(d.versi) !== st.versi;
-      st.versi = String(d.versi);
-      if (berubah) catat('Daftar tayang diperbarui: ' + baru.length + ' slide');
-      simpan(K_DAFTAR, JSON.stringify({ versi: st.versi, slides: baru, waktu: Date.now() }));
-      return sinkron(baru);
-    }).catch(function (e) {
-      st.listGagal++; st.listBeruntun++; st.listErr = String((e && e.message) || e).slice(0, 60);
-      if (st.listBeruntun === 1) catat('Daftar gagal diambil: ' + st.listErr);
-    });
-  }
-
-  /* ---------- Putar slide (dua lapis, memudar) ---------- */
-  var lapA = document.getElementById('lapA'), lapB = document.getElementById('lapB'), imgA = document.getElementById('imgA'), imgB = document.getElementById('imgB');
-  var kosong = document.getElementById('kosong'), kosongTeks = document.getElementById('kosongTeks');
-  var lapisAktif = 'A', idAktif = null, timerPutar = null, berjalan = false;
-
-  function teksKosong() {
-    if (st.listOk) return 'Belum ada gambar yang tayang';
-    if (st.listBeruntun > 0) return 'Menunggu koneksi internet...';
-    return 'Menyiapkan layar TV...';
-  }
-  function tampilKosong(ya) {
-    kosong.className = 'lapis splash' + (ya ? ' aktif' : '');
-    if (ya) { lapA.className = 'lapis'; lapB.className = 'lapis'; idAktif = null; stage.removeAttribute('data-slide'); st.diputar = '-'; }
-    kosongTeks.textContent = teksKosong();
-  }
-  function indeksBerikut() {
-    if (!playlist.length) return -1;
-    var pos = -1; for (var i = 0; i < playlist.length; i++) if (playlist[i].id === idAktif) { pos = i; break; }
-    return (pos + 1) % playlist.length;
-  }
-  function tampilSlide(slide) {
-    var ke = lapisAktif === 'A' ? 'B' : 'A', img = ke === 'A' ? imgA : imgB, lapKe = ke === 'A' ? lapA : lapB, lapDari = ke === 'A' ? lapB : lapA;
-    var url = urlGambar[slide.id];
-    var selesai = false;
-    function naik() {
-      if (selesai) return; selesai = true;
-      lapKe.className = 'lapis aktif'; lapDari.className = 'lapis'; kosong.className = 'lapis splash';
-      lapisAktif = ke; idAktif = slide.id; stage.setAttribute('data-slide', slide.id); st.diputar = slide.id;
-    }
-    img.onload = naik; img.onerror = function () { catat('Gambar ' + slide.id + ' gagal ditampilkan'); delete urlGambar[slide.id]; bangunPlaylist(); };
-    img.src = url;
-    if (img.decode) img.decode().then(naik, function () { /* onload/onerror yang menangani */ });
-    setTimeout(naik, 3000);                                         // jaring pengaman bila decode/onload tidak pernah datang
-  }
-  function langkah() {
-    clearTimeout(timerPutar); timerPutar = null;
-    if (!playlist.length) { berjalan = false; tampilKosong(true); return; }
-    var i = indeksBerikut(), s = playlist[i];
-    if (s.id !== idAktif || !urlGambar[s.id] || lapisAktifKosong()) tampilSlide(s);
-    timerPutar = setTimeout(langkah, s.detik * 1000);
-  }
-  function lapisAktifKosong() { return idAktif === null; }
-  function mulaiPutar() {
-    if (!playlist.length) { if (berjalan) { clearTimeout(timerPutar); berjalan = false; } tampilKosong(true); return; }
-    if (berjalan) return;                                           // sudah memutar: playlist baru dipakai pada langkah berikutnya
-    berjalan = true; langkah();
-  }
+  function berikutnya() { tampilSlide((st.slide + 1) % slides.length); setTimeout(berikutnya, DETIK_SLIDE * 1000); }
 
   /* ---------- Layar penuh & wake lock ---------- */
   function layarPenuhAktif() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
@@ -337,6 +225,7 @@
   function ganti() { if (layarPenuhAktif()) keluarLayarPenuh(); else masukLayarPenuh(); mintaWake(); }
   function onFs() { catat('Layar penuh: ' + (layarPenuhAktif() ? 'aktif' : 'keluar')); }
   document.addEventListener('fullscreenchange', onFs); document.addEventListener('webkitfullscreenchange', onFs);
+
   var wl = null;
   function mintaWake() {
     if (!('wakeLock' in navigator)) { st.wake = 'tidak didukung browser'; return; }
@@ -361,14 +250,14 @@
     });
   }
   window.addEventListener('offline', function () { catat('Browser: OFFLINE'); });
-  window.addEventListener('online', function () { catat('Browser: online lagi'); ambilDaftar(); });
+  window.addEventListener('online', function () { catat('Browser: online lagi'); });
   document.addEventListener('visibilitychange', function () {
     catat('Halaman ' + (document.visibilityState === 'hidden' ? 'DISEMBUNYIKAN (tab/layar tidak aktif)' : 'tampil lagi'));
-    if (document.visibilityState === 'visible') { if (wl) mintaWake(); ambilDaftar(); }
+    if (document.visibilityState === 'visible' && wl) mintaWake();
   });
   window.addEventListener('error', function (e) { catat('Galat skrip: ' + String(e.message || '?').slice(0, 80)); });
 
-  /* ---------- Kelancaran ---------- */
+  /* ---------- Kelancaran (FPS) ---------- */
   function ukurFps() {
     var n = 0, t0 = performance.now(), selesai = false;
     function f(t) { n++; if (t - t0 >= 2000) { selesai = true; st.fps = Math.round(n * 1000 / (t - t0)); st.fpsWaktu = Date.now(); } else requestAnimationFrame(f); }
@@ -394,7 +283,7 @@
     }
   }
 
-  /* ---------- Panel diagnosa ---------- */
+  /* ---------- Panel info ---------- */
   var panel = document.getElementById('panel'), isi = document.getElementById('isi');
   var ua = navigator.userAgent || '', mChrome = ua.match(/Chrome\/([\d.]+)/), webos = /Web0S|webOS|SmartTV/i.test(ua);
   function baris(k, v, kelas) { return '<div class="b"><div class="k">' + k + '</div><div class="v' + (kelas ? ' ' + kelas : '') + '">' + v + '</div></div>'; }
@@ -404,25 +293,20 @@
     var W = window.innerWidth, H = window.innerHeight, dpr = window.devicePixelRatio || 1;
     var ping = st.pingOk ? (st.pingBeruntun > 0 ? ['gagal ' + st.pingBeruntun + 'x berturut-turut', 'bad'] : [st.pingMs + ' ms &middot; ' + Math.max(0, Math.round((Date.now() - st.pingOk) / 1000)) + ' dtk lalu', 'ok'])
                          : (st.pingGagal ? ['belum pernah berhasil (gagal ' + st.pingGagal + 'x)', 'bad'] : ['memeriksa...', '']);
-    var daft = st.listOk ? [st.jumlahSiap + ' dari ' + st.jumlahDaftar + ' slide siap &middot; versi ' + esc(st.versi) + ' &middot; diambil ' + jamTeks(new Date(st.listOk)) + ' (' + st.sumber + ')' + (st.listBeruntun ? ' &middot; GAGAL ' + st.listBeruntun + 'x: ' + esc(st.listErr) : ''), st.listBeruntun ? 'warn' : (st.jumlahSiap < st.jumlahDaftar ? 'warn' : 'ok')]
-                       : (st.listBeruntun ? ['BELUM BERHASIL (' + st.listBeruntun + 'x): ' + esc(st.listErr), 'bad'] : ['mengambil...', '']);
     var pil = document.getElementById('pilStatus');
     if (pil) {
       var offline = navigator.onLine === false || st.pingBeruntun >= 2;
-      var teks = offline ? 'Offline' : (st.listBeruntun > 0 ? 'Daftar bermasalah' : (st.listOk ? 'Terhubung' : 'Memeriksa...'));
-      pil.textContent = teks; pil.className = 'pil ' + (offline ? 'merah' : (st.listBeruntun > 0 ? 'kuning' : (st.listOk ? 'hijau' : '')));
+      pil.textContent = offline ? 'Offline' : (st.pingOk ? 'Terhubung' : 'Memeriksa...'); pil.className = 'pil ' + (offline ? 'merah' : (st.pingOk ? 'hijau' : ''));
     }
     var mem = (performance && performance.memory) ? Math.round(performance.memory.usedJSHeapSize / 1048576) + ' MB' : 'tidak tersedia';
     var h = '';
     h += baris('Waktu TV', jamTeks(now) + ' &middot; ' + p2(now.getDate()) + '/' + p2(now.getMonth() + 1) + '/' + now.getFullYear());
     h += baris('Halaman berjalan', durasi(Date.now() - mulaiHalaman) + ' &nbsp;(sejak pertama dibuka: ' + durasi(Date.now() - mulai) + ')');
     h += baris('Muat ulang otomatis', (parseInt(baca(K_RELOAD), 10) || 0) + ' kali &middot; berikutnya ' + jamTeks(new Date(targetReload)));
-    h += baris('Daftar tayang', daft[0], daft[1]);
-    h += baris('Sedang tampil', esc(st.diputar) + ' &middot; memeriksa tiap ' + DETIK_AMBIL + ' dtk');
     h += baris('Jendela browser', W + ' \u00D7 ' + H + ' &middot; layar ' + (screen.width || '?') + ' \u00D7 ' + (screen.height || '?') + ' &middot; piksel x' + dpr);
-    h += baris('Tampilan', 'putar ' + rot + '&deg; &middot; panggung ' + st.sw + ' \u00D7 ' + st.sh);
+    h += baris('Tampilan', 'putar ' + rot + '&deg; &middot; panggung ' + st.sw + ' \u00D7 ' + st.sh + ' &middot; slide ' + (st.slide + 1) + '/3 (' + DETIK_SLIDE + ' dtk)');
     h += baris('Layar penuh', layarPenuhAktif() ? 'AKTIF' : 'tidak aktif', layarPenuhAktif() ? 'ok' : 'warn');
-    h += baris('Fitur browser', 'layar penuh: ' + ((document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) ? 'ada' : 'TIDAK ADA') + ' &middot; wake lock: ' + esc(st.wake) + ' &middot; simpan gambar: ' + (('caches' in window) ? 'ada' : 'TIDAK ADA (hanya memori)'));
+    h += baris('Fitur browser', 'layar penuh: ' + ((document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen) ? 'ada' : 'TIDAK ADA') + ' &middot; wake lock: ' + esc(st.wake));
     h += baris('Browser', (mChrome ? 'Chromium ' + esc(mChrome[1]) : 'bukan Chromium') + (webos ? ' &middot; webOS terdeteksi' : ''));
     h += baris('Jaringan', (navigator.onLine === false ? 'OFFLINE' : 'online') + ' &middot; ' + ping[0], navigator.onLine === false ? 'bad' : ping[1]);
     h += baris('Kelancaran', st.fps === null ? 'mengukur...' : (st.fps + ' fps' + (st.fps && st.fps < 25 ? ' (berat)' : '') + ' &middot; diukur ' + jamTeks(new Date(st.fpsWaktu))) + ' &middot; memori JS ' + mem, st.fps !== null && st.fps < 25 ? 'warn' : '');
@@ -434,10 +318,18 @@
   }
   function togglePanel() { panel.className = panel.className.indexOf('sembunyi') !== -1 ? '' : 'sembunyi'; gambar(); }
 
+  /* ---------- Jam di slide 3 ---------- */
+  var HARI = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'], BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  function jamBesar() {
+    var d = new Date();
+    document.getElementById('jamBesar').textContent = jamTeks(d);
+    document.getElementById('tglBesar').textContent = HARI[d.getDay()] + ', ' + d.getDate() + ' ' + BULAN[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
   /* ---------- Masukan: remote & pointer ---------- */
   document.addEventListener('keydown', function (e) {
     var k = e.keyCode || e.which, ae = document.activeElement;
-    if (k === 13 && ae && ae.tagName === 'BUTTON') return;
+    if (k === 13 && ae && ae.tagName === 'BUTTON') return;           // OK pada tombol yang sedang fokus = klik tombol itu
     if (k === 37 || k === 49) setRot(270);
     else if (k === 39 || k === 50) setRot(90);
     else if (k === 38 || k === 48) setRot(0);
@@ -465,33 +357,12 @@
   if (!baca(K_MULAI)) simpan(K_MULAI, String(mulaiHalaman));
   var otomatis = false;
   try { otomatis = window.sessionStorage.getItem('tvReloadAuto') === '1'; window.sessionStorage.removeItem('tvReloadAuto'); } catch (e) {}
-  if (qs('info') === '1') panel.className = '';
-  layout();
+  layout(); jamBesar(); tampilSlide(0); setTimeout(berikutnya, DETIK_SLIDE * 1000);
   catat(otomatis ? 'Mulai setelah muat ulang otomatis' : 'Halaman dibuka');
-
-  // 1) Langsung tayang dari daftar & gambar yang tersimpan (tanpa menunggu internet)
-  (function () {
-    var t = null; try { t = JSON.parse(baca(K_DAFTAR) || 'null'); } catch (e) {}
-    if (t && Array.isArray(t.slides)) {
-      daftarServer = bersihkanDaftar(t.slides); st.versi = String(t.versi || '-');
-      var rantai = Promise.resolve();
-      daftarServer.forEach(function (s) { rantai = rantai.then(function () { return pastikanGambar(s, false); }); });
-      rantai.then(function () { if (!sedangSinkron) bangunPlaylist(); if (playlist.length) catat('Tayang dari simpanan browser (' + playlist.length + ' slide)'); });
-    } else tampilKosong(true);
-  })();
-  // 2) Ambil daftar terbaru, lalu periksa berkala
-  ambilDaftar(); setInterval(ambilDaftar, DETIK_AMBIL * 1000);
   ping(); setInterval(ping, DETIK_PING * 1000);
   setTimeout(ukurFps, 3000); setInterval(ukurFps, DETIK_FPS * 1000);
-  setInterval(function () { if (kosong.className.indexOf('aktif') !== -1) kosongTeks.textContent = teksKosong(); gambar(); cekReload(); }, 1000);
+  setInterval(function () { jamBesar(); gambar(); cekReload(); }, 1000);
   gambar();
-
-  /* ---------- Service worker (sw.js): halaman ini tetap bisa dibuka walau TV dinyalakan tanpa internet ---------- */
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function () {
-      navigator.serviceWorker.register('/sw.js').catch(function (err) { catat('Service worker gagal: ' + String((err && err.message) || err).slice(0, 40)); });
-    });
-  }
 })();
 </script>
 </body>
