@@ -107,13 +107,13 @@
           var it = x.item[b] || {}, mm = Math.round(Number(it.m)), vv = bersihTeks(it.v, 40).toUpperCase(), pp = Math.round(Number(it.p));
           var dd = /^\d{4}-\d{2}-\d{2}$/.test(String(it.d || '')) ? String(it.d) : '';
           if (o.jenis === 'periode' && !dd) continue;
-          var tt = bersihTeks(it.t, 8).toUpperCase(); if (!tt && dd) tt = dd.slice(8, 10) + ' ' + (BLN[+dd.slice(5, 7) - 1] || '');
+          var tt = bersihTeks(it.t, 8).toUpperCase(); if (!tt && dd) tt = (dd.slice(8, 10) + ' ' + (BLN[+dd.slice(5, 7) - 1] || '')).toUpperCase();
           if (isFinite(mm) && mm >= 0 && mm <= 1439) o.item.push({ d: dd, t: tt, m: mm, j: p2(Math.floor(mm / 60)) + '.' + p2(mm % 60), v: vv || '-', p: (isFinite(pp) && pp > 0) ? Math.min(pp, 999) : 0 });
         }
         o.item.sort(function (p, q) { return p.d < q.d ? -1 : p.d > q.d ? 1 : p.m - q.m; });
         if (o.jenis === 'periode') {
           o.dari = /^\d{4}-\d{2}-\d{2}$/.test(String(x.dari || '')) ? String(x.dari) : ''; o.sampai = /^\d{4}-\d{2}-\d{2}$/.test(String(x.sampai || '')) ? String(x.sampai) : '';
-          o.periodeTeks = bersihTeks(x.periodeTeks, 40).toUpperCase(); var sx = Math.round(Number(x.sisa)); o.sisa = (isFinite(sx) && sx > 0) ? Math.min(sx, 999) : 0;
+          o.periodeTeks = bersihTeks(x.periodeTeks, 40); var sx = Math.round(Number(x.sisa)); o.sisa = (isFinite(sx) && sx > 0) ? Math.min(sx, 999) : 0;
         }
       }
     }
@@ -218,6 +218,7 @@
     });
   }
   /* Gambar siap? Ada di memori -> ada di Cache Storage -> unduh (kalau boleh). */
+  var SEATED_MENIT = 120;                                                            // seated: dari jam mulai sampai 2 jam sesudahnya (sama dengan menu Reservasi)
   function khusus(s) { return !!s && (s.jenis === 'ultah' || s.jenis === 'reservasi' || s.jenis === 'periode'); }
   function sidik(teks) { var h = 5381; for (var i = 0; i < teks.length; i++) h = ((h * 33) ^ teks.charCodeAt(i)) >>> 0; return h.toString(36); }
   /** Slide otomatis -> halaman-halaman (ulang tahun 4 nama/halaman, reservasi 6 baris/halaman). Data hari lain & reservasi lewat 3 jam tidak ditampilkan. */
@@ -232,9 +233,10 @@
     var n = Math.ceil(isi.length / per), out = [];
     for (i = 0; i < n; i++) {
       var bagian = isi.slice(i * per, (i + 1) * per), e = { id: s.id + '#' + (i + 1), induk: s.id, jenis: s.jenis, detik: s.detik, hari: s.hari, mulai: s.mulai, selesai: s.selesai,
-        tglTeks: s.tglTeks, ucapan: s.ucapan || '', periodeTeks: s.periodeTeks || '', sisa: (i === n - 1 && s.sisa) ? s.sisa : 0, halaman: i + 1, jumlahHalaman: n };
+        tgl: s.tgl || '', tglTeks: s.tglTeks, ucapan: s.ucapan || '', periodeTeks: s.periodeTeks || '', sisa: (i === n - 1 && s.sisa) ? s.sisa : 0, halaman: i + 1, jumlahHalaman: n };
       if (s.jenis === 'ultah') e.nama = bagian; else e.item = bagian;
-      e.ver = sidik(JSON.stringify([bagian, e.ucapan, e.tglTeks, e.periodeTeks, e.sisa, i, n]));
+      e.seated = (s.jenis === 'reservasi') ? bagian.map(function (x) { return s.tgl === w.tgl && w.menit >= x.m && w.menit < x.m + SEATED_MENIT; }) : [];
+      e.ver = sidik(JSON.stringify([bagian, e.ucapan, e.tglTeks, e.periodeTeks, e.sisa, i, n, e.seated]));            // warna berganti: kartu digambar ulang paling lambat 30 dtk setelah jamnya
       out.push(e);
     }
     return out;
@@ -324,10 +326,8 @@
     var tengah = el_('div', s.jenis === 'ultah' ? 'kh-tengah' : 'kh-tengah kh-atas');
     if (s.jenis === 'ultah') for (i = 0; i < s.nama.length; i++) tengah.appendChild(el_('div', 'kh-nama', s.nama[i]));
     else if (s.jenis === 'reservasi') {
-      var wb = wibSekarang();
       for (i = 0; i < s.item.length; i++) {
-        var mulai = Number(s.item[i].m);
-        var seated = wb.tgl === s.tgl && Number.isFinite(mulai) && wb.menit >= mulai && wb.menit < mulai + 120;
+        var seated = !!(s.seated && s.seated[i]);
         var b = el_('div', 'kh-rsv' + (seated ? ' kh-rsv-seated' : ''));
         b.appendChild(el_('div', 'kh-jam', s.item[i].j)); b.appendChild(el_('div', 'kh-venue', s.item[i].v));
         if (s.item[i].p > 0) b.appendChild(el_('div', 'kh-pax', s.item[i].p + ' PAX')); tengah.appendChild(b);
@@ -625,7 +625,7 @@
   ping(); setInterval(ping, DETIK_PING * 1000);
   setTimeout(ukurFps, 3000); setInterval(ukurFps, DETIK_FPS * 1000);
   setInterval(function () {
-    if (jamPillEl) jamPillEl.textContent = jamTeks(new Date(Date.now() + offsetWaktu));
+    if (jamPillEl) { var wj = new Date(Date.now() + offsetWaktu + 7 * 3600000); jamPillEl.textContent = p2(wj.getUTCHours()) + ':' + p2(wj.getUTCMinutes()) + ':' + p2(wj.getUTCSeconds()); }      // selalu WIB, apa pun zona waktu TV
     if (kosong.className.indexOf('aktif') !== -1) renderKosong();
     gambar();
     cekReload();
