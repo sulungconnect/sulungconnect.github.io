@@ -325,7 +325,8 @@
     if (s.jenis === 'ultah') for (i = 0; i < s.nama.length; i++) tengah.appendChild(el_('div', 'kh-nama', s.nama[i]));
     else if (s.jenis === 'reservasi') {
       for (i = 0; i < s.item.length; i++) {
-        var seated = String(s.item[i].status || '').toUpperCase() === 'SEATED';
+        var wb = wibSekarang();
+        var seated = wb.tgl === s.item[i].d && wb.menit >= s.item[i].m && wb.menit < s.item[i].m + 120;
         var b = el_('div', 'kh-rsv' + (seated ? ' kh-rsv-seated' : ''));
         b.appendChild(el_('div', 'kh-jam', s.item[i].j)); b.appendChild(el_('div', 'kh-venue', s.item[i].v));
         if (s.item[i].p > 0) b.appendChild(el_('div', 'kh-pax', s.item[i].p + ' PAX')); tengah.appendChild(b);
