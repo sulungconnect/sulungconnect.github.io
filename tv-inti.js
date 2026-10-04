@@ -113,7 +113,7 @@
         o.item.sort(function (p, q) { return p.d < q.d ? -1 : p.d > q.d ? 1 : p.m - q.m; });
         if (o.jenis === 'periode') {
           o.dari = /^\d{4}-\d{2}-\d{2}$/.test(String(x.dari || '')) ? String(x.dari) : ''; o.sampai = /^\d{4}-\d{2}-\d{2}$/.test(String(x.sampai || '')) ? String(x.sampai) : '';
-          o.periodeTeks = bersihTeks(x.periodeTeks, 40).toUpperCase(); var sx = Math.round(Number(x.sisa)); o.sisa = (isFinite(sx) && sx > 0) ? Math.min(sx, 999) : 0;
+          o.periodeTeks = bersihTeks(x.periodeTeks, 40); var sx = Math.round(Number(x.sisa)); o.sisa = (isFinite(sx) && sx > 0) ? Math.min(sx, 999) : 0;
         }
       }
     }
@@ -324,9 +324,8 @@
     var tengah = el_('div', s.jenis === 'ultah' ? 'kh-tengah' : 'kh-tengah kh-atas');
     if (s.jenis === 'ultah') for (i = 0; i < s.nama.length; i++) tengah.appendChild(el_('div', 'kh-nama', s.nama[i]));
     else if (s.jenis === 'reservasi') {
-      var wb = wibSekarang();
       for (i = 0; i < s.item.length; i++) {
-        var seated = wb.tgl === s.tgl && wb.menit >= s.item[i].m && wb.menit < s.item[i].m + 180;
+        var seated = String(s.item[i].status || '').toUpperCase() === 'SEATED';
         var b = el_('div', 'kh-rsv' + (seated ? ' kh-rsv-seated' : ''));
         b.appendChild(el_('div', 'kh-jam', s.item[i].j)); b.appendChild(el_('div', 'kh-venue', s.item[i].v));
         if (s.item[i].p > 0) b.appendChild(el_('div', 'kh-pax', s.item[i].p + ' PAX')); tengah.appendChild(b);
